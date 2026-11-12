@@ -3,61 +3,119 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>歩きの中割りゲーム</title>
 <style>
-:root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-html,body{height:100%;margin:0}
-body{background:#111722;color:#f4f6f8;font-family:"Hiragino Sans","Yu Gothic UI","Noto Sans JP",sans-serif;display:flex;justify-content:center}
-main{width:100%;max-width:760px;padding:8px 12px 12px;display:flex;flex-direction:column;gap:6px}
-.top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-h1{font-size:22px;margin:0;font-weight:800}
-.top span{color:#aab4c0;font-size:13px}
-.lead{margin:0;font-size:13px;line-height:1.5;color:#e6e9ee}
-.strip{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-.th{cursor:pointer;text-align:center;font-size:15px;font-weight:700;padding-bottom:2px}
+:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;margin:0;overscroll-behavior:none;overflow:hidden}
+body{background:linear-gradient(180deg,#ffedbe 0%,#fff9ea 48%,#ffe4b8 100%);color:#5f4632;font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI","Noto Sans JP",sans-serif;display:flex;justify-content:center;position:fixed;inset:0;width:100%}
+main{touch-action:none;width:100%;max-width:760px;height:100%;padding:10px 12px 14px;display:flex;flex-direction:column;gap:8px;box-sizing:border-box;min-height:0;overflow:hidden}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+h1{font-size:17px;margin:0;font-weight:800;color:#e8890c;letter-spacing:.02em}
+.top span{color:#bb8f5f;font-size:13px;font-weight:700}
+.langs{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+.strip{direction:ltr}
+.langb{flex:0 0 auto;padding:5px 10px;font-size:12px}
+.langb.on{color:#fff;background:linear-gradient(180deg,#ffc766,#ffa726);border-color:#ffa726;box-shadow:0 3px 0 #e8890c}
+.lead{margin:0;font-size:13px;line-height:1.6;color:#70543c;background:rgba(255,255,255,.72);border:2px solid #ffe4b3;border-radius:16px;padding:8px 12px}
+.strip{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.th{cursor:pointer;text-align:center;font-size:15px;font-weight:800;padding-bottom:2px;color:#bb8f5f}
 .th .tl{margin-bottom:3px}
-.th canvas{display:block;width:100%;height:auto;background:#fff;border:3px solid transparent;box-sizing:border-box}
-.th.cur{color:#ff3b3b}
-.th.cur canvas{border-color:#ff1f1f}
-.paper{background:#fff;border:1px solid #cfd6dd;border-radius:6px;overflow:hidden}
-canvas#cv{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
-.msg{min-height:26px;font-size:14px;line-height:1.7}
-.msg b{font-size:22px}
-.gl{color:#9be000;font-weight:700}
+.th canvas{display:block;width:100%;height:auto;background:#fff;border:3px solid #ffe1a8;border-radius:14px;box-sizing:border-box;box-shadow:0 2px 6px rgba(230,150,20,.12)}
+.th.cur{color:#ef7d00}
+.th.cur canvas{border-color:#ef7d00;box-shadow:0 4px 12px rgba(239,125,0,.35)}
+.paper{background:#fff;border:2px solid #ffe1a8;border-radius:20px;overflow:hidden;box-shadow:0 8px 20px rgba(230,150,20,.13)}
+.cvw{position:relative;flex:1 1 auto;min-height:160px}
+canvas#cv{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain;touch-action:none;cursor:grab}
+#tip{position:absolute;flex:none;min-width:0;padding:6px 12px;font-size:13px;font-weight:800;background:#ffbe55;color:#fff;border:2px solid #fff;border-radius:999px;box-shadow:0 3px 8px rgba(230,150,20,.35)}
+#pop{position:fixed;inset:0;background:rgba(95,70,50,.45);display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
+#pop[hidden]{display:none}
+#pop .card{position:relative;max-width:440px;width:100%;background:#fffaf0;color:#5f4632;border:3px solid #ffcf87;border-radius:26px;padding:20px 18px 22px;box-shadow:0 16px 40px rgba(95,70,50,.3)}
+#popx{position:absolute;top:8px;right:8px;flex:none;width:40px;height:40px;min-width:0;padding:0;font-size:26px;line-height:1;border:none;background:transparent;color:#e8890c;box-shadow:none}
+.pt{font-weight:800;font-size:16px;color:#ef7d00;margin:0 40px 10px 0}
+.pb{white-space:pre-line;font-size:17px;line-height:1.9}
+.msg{min-height:26px;font-size:14px;line-height:1.7;font-weight:600;color:#70543c}
+.msg b{font-size:22px;color:#ef7d00}
+.gl{color:#4da63a;font-weight:800}
 .key i{display:inline-block;width:11px;height:11px;border-radius:50%;margin:0 4px 0 12px;vertical-align:-1px}
-.warn{color:#ffb25a}
-.row{display:flex;gap:6px;flex-wrap:wrap}
+.warn{color:#d64545;font-weight:700}
+.row{display:flex;gap:8px;flex-wrap:wrap}
 .row[hidden],button[hidden]{display:none}
-button{flex:1;min-width:0;padding:7px 6px;font:inherit;font-size:14px;font-weight:600;color:#fff;background:#111722;border:2px solid #b9aeb9;border-radius:3px}
+button{touch-action:manipulation;flex:1;min-width:0;padding:8px 6px;font:inherit;font-size:14px;font-weight:800;color:#7c5636;background:#fff;border:2px solid #ffcf87;border-radius:999px;box-shadow:0 3px 0 #ffe1a8;cursor:pointer}
+button:active{transform:translateY(2px);box-shadow:0 1px 0 #ffe1a8}
 button:focus-visible{outline:2px solid #6ea8ff;outline-offset:2px}
-#gd.on{color:#9be000}
-button.go{background:#fff;color:#111722;border-color:#fff;font-size:16px}
+button:disabled{opacity:.45;box-shadow:none}
+#gd.on{color:#fff;background:#8bd17c;border-color:#8bd17c;box-shadow:0 3px 0 #67b657}
+button.go{background:linear-gradient(180deg,#ffc766,#ffa726);color:#fff;border-color:#ffa726;box-shadow:0 4px 0 #e8890c;font-size:17px}
 .tr button{min-height:42px}
+.row .narrow{flex:0 0 56px}
 .tr #pv,.tr #nv{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;line-height:1.15;font-size:12px}
 .tr .ar{font-size:22px;font-weight:300}
 .pp{flex:1.2;display:flex;flex-direction:column;gap:4px}
 .pp button{width:100%;flex:1;min-height:0;padding:4px;font-size:12px}
 .pp.single button{min-height:42px;font-size:18px}
+#gp{position:fixed;inset:0;background:rgba(95,70,50,.5);display:flex;align-items:center;justify-content:center;padding:20px;z-index:11}
+#gp[hidden]{display:none}
+#gp .gpc{display:flex;flex-direction:column;gap:10px;width:min(92vw,560px)}
+#gpi{width:100%;max-height:66vh;object-fit:contain}
+body.done .pp{flex:2}
+body.done .pp #bp{flex:1.8;min-height:60px;font-size:21px;color:#fff;background:linear-gradient(180deg,#ffc766,#ffa726);border-color:#ffa726;box-shadow:0 4px 0 #e8890c}
+body.done .pp #bi{flex:.75;font-size:12px;opacity:.9}
 </style></head><body>
 <main>
-<div class="top"><h1>歩きの中割りゲーム</h1><span id="step"></span></div>
-<p class="lead">関節（膝・足首・つま先）を動かして中割りポーズを取らせてください。</p>
+<div class="top"><h1 id="ttl">歩きの中割りゲーム</h1><div class="langs"><button class="langb" data-lang="ja">日本語</button><button class="langb" data-lang="en">English</button><button class="langb" data-lang="ko">한국어</button><button class="langb" data-lang="zh">中文</button><button class="langb" data-lang="fr">Français</button><button class="langb" data-lang="es">Español</button><button class="langb" data-lang="ar">العربية</button></div></div>
 <div class="strip" id="strip"></div>
-<div class="paper"><canvas id="cv"></canvas></div>
+<div class="paper cvw" id="cvw"><canvas id="cv"></canvas><button id="tip" hidden>ポイントを読む</button></div>
 <div class="msg" id="msg"></div>
 <div class="row" id="rGo" hidden><button class="go" id="go">完成とする</button></div>
 <div class="row" id="r1"><button id="gd" class="on">ガイド:ON</button><button id="nxs">次の中割りへ</button></div>
 <div class="row" id="rF" hidden><button id="sr">見本参考を隠す</button><button id="rdo">描き直す</button></div>
 <div class="row tr">
-<button id="pv"><span class="ar">＜</span><span>1枚<br>戻る</span></button>
+<button id="pv"><span class="ar">＜</span><span id="pvt">1枚<br>戻る</span></button>
 <div class="pp single" id="pp"><button id="bp">▶ 再生</button><button id="bi" hidden>▶ 見本参考を再生</button></div>
-<button id="nv"><span>1枚<br>進む</span><span class="ar">＞</span></button>
+<button id="nv"><span id="nvt">1枚<br>進む</span><span class="ar">＞</span></button>
 </div>
-<div class="row"><button id="clr">この中割りをリセット</button><button id="gif" hidden>GIFアニメで保存</button><button id="ba">最初から</button></div>
-<div id="gp" hidden><img id="gpi" alt="作成したGIFアニメ" style="display:block;width:100%;border-radius:4px;background:#fff"></div>
+<div class="row"><button id="adjM" class="narrow" disabled aria-label="選んだ関節を少し戻す">−</button><button id="adjP" class="narrow" disabled aria-label="選んだ関節を少し動かす">＋</button><button id="spd">速度：1倍</button><button id="lgd">遊び方</button></div>
+<div class="row"><button id="undo" disabled>元に戻す</button><button id="clr">この中割りをリセット</button><button id="gif" hidden>GIFアニメで保存</button><button id="ba">最初から</button></div>
+<div id="gp" hidden><div class="gpc"><img id="gpi" alt="作成したGIFアニメ" style="display:block;width:100%;border-radius:12px;background:#fff"><button id="gpx">閉じる</button></div></div>
 </main>
+<div id="pop" hidden><div class="card"><button id="popx" aria-label="閉じる">×</button><div class="pt" id="popt"></div><div class="pb" id="popb"></div></div></div>
 <script>
 const W=720,H=520,G=450,L1=96,L2=96,FT=34,TL=135,AU=74,AL=66,HX=330;
 const $=i=>document.getElementById(i),cv=$('cv'),cx=cv.getContext('2d');
 cv.width=W;cv.height=H;
+// ---- 多言語（日本語／英語。選んだ言語は保存される） ----
+let lang='ja';try{const v=localStorage.getItem('walk-nakawari-lang');if(['ja','en','ko','zh','fr','es','ar'].includes(v))lang=v}catch(e){}
+const LANGS=['ja','en','ko','zh'],LANGNAME={ja:'日本語',en:'English',ko:'한국어',zh:'中文'};
+const STR={
+ja:{title:'歩きの中割りゲーム',key1:'原画①(動画①)',key2:'原画②(動画⑤)',framePre:'動画',axisT:'軸足:',axisL:'左足',axisR:'右足',readTips:'ポイントを読む',finish:'完成とする',next:'次の中割りへ',redraw:'描き直す',undo:'元に戻す',reset:'この中割りをリセット',saveGif:'GIFアニメで保存',startOver:'最初から',close:'閉じる',howTo:'遊び方',adjBack:'選んだ関節を少し戻す',adjFwd:'選んだ関節を少し動かす',gifAlt:'作成したGIFアニメ',pvT:'1枚<br>戻る',nvT:'1枚<br>進む',stop:'■ 停止',play:'▶ 再生',playMine:'▶ 自分の中割を再生',playRef:'▶ 見本参考を再生',guide:'ガイド:',guideLabel:'ガイド:',guideOff:'ガイド: OFF',hideRef:'見本参考を隠す',showRef:'見本参考を表示',spd1:'速度：1倍',spd05:'速度：0.5倍',lock:'動画2〜4を全部描くと、動画6〜8に進めます',playMsgMine:'自分の中割り',playMsgRef:'見本参考',complete:'完成！',showingRef:'見本参考を表示中',greenRef:'緑の人形が見本参考です',poseRef:'ポーズ見本',refShort:'見本参考',creating:'作成中…',shareSent:'GIFアニメを共有メニューに渡しました',gifSavedLong:'GIFアニメを保存しました。保存されないときは、表示された画像を長押し（右クリック）して保存してください',gifSaved:'GIFアニメを保存しました',gifFail:'GIFを保存できませんでした',restored:'自動保存から前回の続きを復元しました',legFront:'手前の脚',legBack:'奥の脚',joints:{k:'膝',n:'足首',t:'つま先'},
+playing:s=>`${s}を再生中（24fps・3コマ打ち）`,keyMsg:f=>`${FNAME(f)}は原画なので動かせません。「1枚進む・戻る」で中割りを選ぼう。`,fine:(leg,jn)=>`微調整：${leg}・${jn}を選択中（−／＋で少しずつ動かせます）`,tipTitle:n=>`動画${n}のポイント`,
+legendBody:'🔴赤い丸＝手前の脚（左足）、🔵青い丸＝奥の脚（右足）です。\n膝＝●大きい丸、足首＝◆ひし形、つま先＝▲小さい三角です。\n関節をタップで選んで、−／＋ボタンでも少しずつ動かせます。',
+tips:['前足がしっかり地面を踏む。\n後ろ足は、膝の位置は①と3の均等割りで、足先は少し跳ねる。','重心のかかってる足は伸びて、設置位置は①と⑤の均等割り。\n浮いてる足は、曲げて添えてる感じ。','後ろ足はつま先に重心かかって、かかと浮く。\n浮いてる前足は、太ももから⑤より少し上がって力が入っている。','前足がしっかり地面を踏む。\n後ろ足は、膝の位置は⑤と7の均等割りで、足先は少し跳ねる。','重心のかかってる足は伸びて、設置位置は⑤と①の均等割り。\n浮いてる足は、曲げて添えてる感じ。','後ろ足はつま先に重心かかって、かかと浮く。\n浮いてる前足は、太ももから①より少し上がって力が入っている。']},
+en:{title:'Walk In-Between Game',key1:'Key 1 (Frame 1)',key2:'Key 2 (Frame 5)',framePre:'Frame ',axisT:'Support leg:',axisL:'Left',axisR:'Right',readTips:'Read tips',finish:'Mark complete',next:'Next in-between',redraw:'Redraw',undo:'Undo',reset:'Reset this frame',saveGif:'Save as GIF',startOver:'Start over',close:'Close',howTo:'How to play',adjBack:'Nudge selected joint back',adjFwd:'Nudge selected joint forward',gifAlt:'Your GIF animation',pvT:'1 frame<br>back',nvT:'1 frame<br>forward',stop:'■ Stop',play:'▶ Play',playMine:'▶ Play my animation',playRef:'▶ Play reference',guide:'Guide: ',guideLabel:'Guide:',guideOff:'Guide: OFF',hideRef:'Hide reference',showRef:'Show reference',spd1:'Speed: 1x',spd05:'Speed: 0.5x',lock:'Finish all of frames 2-4 first to unlock frames 6-8.',playMsgMine:'your animation',playMsgRef:'the reference',complete:'Complete!',showingRef:'Showing the reference',greenRef:'The green figure is the reference',poseRef:'Pose reference',refShort:'Reference',creating:'Creating...',shareSent:'Sent the GIF to the share menu',gifSavedLong:"GIF saved. If it didn't save, long-press (or right-click) the image shown to save it.",gifSaved:'GIF saved',gifFail:"Couldn't save the GIF",restored:'Restored your last session from autosave',legFront:'front leg',legBack:'back leg',joints:{k:'knee',n:'ankle',t:'toe'},
+playing:s=>`Playing ${s} (24fps, on threes)`,keyMsg:f=>`${FNAME(f)} is a keyframe and can't be moved. Use the frame step buttons to choose an in-between.`,fine:(leg,jn)=>`Fine adjust: ${leg}, ${jn} selected (nudge with - / +)`,tipTitle:n=>`Frame ${n} tips`,
+legendBody:'🔴 Red circles = the front leg (left leg), 🔵 blue circles = the back leg (right leg).\nKnee = ● large circle, ankle = ◆ diamond, toe = ▲ small triangle.\nTap a joint to select it, then nudge it little by little with the - / + buttons.',
+tips:['The front leg plants firmly on the ground.\nFor the back leg, place the knee evenly between 1 and 3, and let the toes flick up a little.','The leg carrying the weight stays straight, planted evenly between 1 and 5.\nThe lifted leg stays bent, resting lightly.','The back leg pushes off on its toes, heel raised.\nThe lifted front leg rises a little higher than 5 from the thigh, with energy in it.','The front leg plants firmly on the ground.\nFor the back leg, place the knee evenly between 5 and 7, and let the toes flick up a little.','The leg carrying the weight stays straight, planted evenly between 5 and 1.\nThe lifted leg stays bent, resting lightly.','The back leg pushes off on its toes, heel raised.\nThe lifted front leg rises a little higher than 1 from the thigh, with energy in it.']},
+ko:{title:'걷기 동화 게임',key1:'원화①(동화①)',key2:'원화②(동화⑤)',framePre:'동화',axisT:'지지발:',axisL:'왼발',axisR:'오른발',readTips:'포인트 읽기',finish:'완성으로 하기',next:'다음 동화로',redraw:'다시 그리기',undo:'되돌리기',reset:'이 동화 리셋',saveGif:'GIF로 저장',startOver:'처음부터',close:'닫기',howTo:'게임 방법',adjBack:'선택한 관절을 조금 뒤로',adjFwd:'선택한 관절을 조금 앞으로',gifAlt:'만든 GIF 애니메이션',pvT:'1장<br>뒤로',nvT:'1장<br>앞으로',stop:'■ 정지',play:'▶ 재생',playMine:'▶ 내 동화 재생',playRef:'▶ 모범 재생',guide:'가이드: ',guideLabel:'가이드:',guideOff:'가이드: OFF',hideRef:'모범 숨기기',showRef:'모범 보기',spd1:'속도: 1배',spd05:'속도: 0.5배',lock:'동화 2~4를 모두 그리면 동화 6~8로 진행할 수 있습니다.',playMsgMine:'내 동화',playMsgRef:'모범',complete:'완성!',showingRef:'모범을 표시 중',greenRef:'초록색 인형이 모범입니다',poseRef:'포즈 모범',refShort:'모범',creating:'만드는 중…',shareSent:'GIF를 공유 메뉴로 보냈습니다',gifSavedLong:'GIF를 저장했습니다. 저장되지 않았으면 표시된 이미지를 길게 눌러(마우스 오른쪽 클릭) 저장하세요.',gifSaved:'GIF를 저장했습니다',gifFail:'GIF를 저장할 수 없었습니다',restored:'자동 저장에서 지난번 이어서 복원했습니다',legFront:'앞쪽 다리',legBack:'뒤쪽 다리',joints:{k:'무릎',n:'발목',t:'발끝'},
+playing:s=>`${s} 재생 중 (24fps, 3장 찍기)`,keyMsg:f=>`${FNAME(f)}은(는) 원화라서 움직일 수 없습니다. 「1장 앞으로·뒤로」로 동화를 선택하세요.`,fine:(leg,jn)=>`미세 조정: ${leg}·${jn} 선택 중 (-/+로 조금씩 움직일 수 있습니다)`,tipTitle:n=>`동화 ${n}의 포인트`,
+legendBody:'🔴 빨간 원 = 앞쪽 다리(왼발), 🔵 파란 원 = 뒤쪽 다리(오른발)입니다.\n무릎 = ● 큰 원, 발목 = ◆ 마름모, 발끝 = ▲ 작은 삼각형입니다.\n관절을 탭해서 선택하고, -/+ 버튼으로도 조금씩 움직일 수 있습니다.',
+tips:['앞다리가 땅을 단단히 딛습니다.\n뒷다리는 무릎 위치가 ①과 3의 균등 분할, 발끝은 살짝 튀어 오르게.','체중이 실린 다리는 곧게 펴고, 위치는 ①과 ⑤의 균등 분할.\n떠 있는 다리는 구부려서 가볍게 붙인 느낌으로.','뒷다리는 발끝에 체중이 실리고 뒤꿈치가 뜹니다.\n떠 있는 앞다리는 허벅지부터 ⑤보다 살짝 올라가 힘이 들어가 있습니다.','앞다리가 땅을 단단히 딛습니다.\n뒷다리는 무릎 위치가 ⑤와 7의 균등 분할, 발끝은 살짝 튀어 오르게.','체중이 실린 다리는 곧게 펴고, 위치는 ⑤와 ①의 균등 분할.\n떠 있는 다리는 구부려서 가볍게 붙인 느낌으로.','뒷다리는 발끝에 체중이 실리고 뒤꿈치가 뜹니다.\n떠 있는 앞다리는 허벅지부터 ①보다 살짝 올라가 힘이 들어가 있습니다.']},
+zh:{title:'步行中间张游戏',key1:'原画①(动画①)',key2:'原画②(动画⑤)',framePre:'动画',axisT:'支撑脚：',axisL:'左脚',axisR:'右脚',readTips:'查看要点',finish:'标记完成',next:'下一张中间张',redraw:'重画',undo:'撤销',reset:'重置这张',saveGif:'保存为 GIF',startOver:'重新开始',close:'关闭',howTo:'玩法',adjBack:'把所选关节稍微往回移',adjFwd:'把所选关节稍微往前移',gifAlt:'已创建的 GIF 动画',pvT:'后退<br>1张',nvT:'前进<br>1张',stop:'■ 停止',play:'▶ 播放',playMine:'▶ 播放我的中间张',playRef:'▶ 播放参考范例',guide:'辅助线：',guideLabel:'辅助线：',guideOff:'辅助线：OFF',hideRef:'隐藏参考范例',showRef:'显示参考范例',spd1:'速度：1倍',spd05:'速度：0.5倍',lock:'把动画2~4全部画完后，才能进入动画6~8。',playMsgMine:'我的中间张',playMsgRef:'参考范例',complete:'完成！',showingRef:'正在显示参考范例',greenRef:'绿色的人偶就是参考范例',poseRef:'姿势范例',refShort:'参考范例',creating:'创建中…',shareSent:'已把 GIF 发送到分享菜单',gifSavedLong:'GIF 已保存。如果没有保存成功，请长按（或右键单击）显示的图片来保存。',gifSaved:'GIF 已保存',gifFail:'无法保存 GIF',restored:'已从自动保存恢复到上次的进度',legFront:'前面的腿',legBack:'后面的腿',joints:{k:'膝盖',n:'脚踝',t:'脚尖'},
+playing:s=>`正在播放${s}（24fps・一拍三）`,keyMsg:f=>`${FNAME(f)}是原画，不能移动。用「前进/后退1张」来选择中间张。`,fine:(leg,jn)=>`微调：已选中${leg}·${jn}（用 -/+ 可以一点点移动）`,tipTitle:n=>`动画${n}的要点`,
+legendBody:'🔴 红色圆圈 = 前面的腿（左脚），🔵 蓝色圆圈 = 后面的腿（右脚）。\n膝盖 = ● 大圆圈，脚踝 = ◆ 菱形，脚尖 = ▲ 小三角形。\n点按关节将其选中，也可以用 -/+ 按钮一点点移动。',
+tips:['前脚稳稳地踩住地面。\n后脚的膝盖位置取 ① 和 3 的中间，脚尖稍微弹起。','承受重心的腿伸直，落脚位置取 ① 和 ⑤ 的中间。\n悬空的腿弯曲着，轻轻贴靠的感觉。','后脚用脚尖撑着重心，脚跟抬起。\n悬空的前脚从大腿处比 ⑤ 稍微再抬高一点，带着劲。','前脚稳稳地踩住地面。\n后脚的膝盖位置取 ⑤ 和 7 的中间，脚尖稍微弹起。','承受重心的腿伸直，落脚位置取 ⑤ 和 ① 的中间。\n悬空的腿弯曲着，轻轻贴靠的感觉。','后脚用脚尖撑着重心，脚跟抬起。\n悬空的前脚从大腿处比 ① 稍微再抬高一点，带着劲。']},
+fr:{title:'Jeu des intervalles de la marche',key1:'Clé 1 (Image 1)',key2:'Clé 2 (Image 5)',framePre:'Image ',axisT:'Jambe d’appui :',axisL:'gauche',axisR:'droite',readTips:'Lire les conseils',finish:'Marquer comme terminé',next:'Intervalle suivant',redraw:'Redessiner',undo:'Annuler',reset:'Réinitialiser cette image',saveGif:'Enregistrer en GIF',startOver:'Recommencer',close:'Fermer',howTo:'Comment jouer',adjBack:'Reculer légèrement l’articulation choisie',adjFwd:'Avancer légèrement l’articulation choisie',gifAlt:'Votre animation GIF',pvT:'1 image<br>en arrière',nvT:'1 image<br>en avant',stop:'■ Arrêter',play:'▶ Lecture',playMine:'▶ Lire mon animation',playRef:'▶ Lire la référence',guide:'Guide : ',guideLabel:'Guide :',guideOff:'Guide : OFF',hideRef:'Masquer la référence',showRef:'Afficher la référence',spd1:'Vitesse : x1',spd05:'Vitesse : x0,5',lock:'Terminez toutes les images 2 à 4 pour débloquer les images 6 à 8.',playMsgMine:'votre animation',playMsgRef:'la référence',complete:'Terminé !',showingRef:'Référence affichée',greenRef:'Le personnage vert est la référence',poseRef:'Pose de référence',refShort:'Référence',creating:'Création...',shareSent:'GIF envoyé au menu de partage',gifSavedLong:"GIF enregistré. S'il ne s'est pas enregistré, appuyez longuement (ou clic droit) sur l'image affichée pour l'enregistrer.",gifSaved:'GIF enregistré',gifFail:"Impossible d'enregistrer le GIF",restored:'Votre session précédente a été restaurée depuis la sauvegarde automatique',legFront:'jambe avant',legBack:'jambe arrière',joints:{k:'genou',n:'cheville',t:'orteils'},
+playing:s=>`Lecture de ${s} (24 ips, par trois)`,keyMsg:f=>`${FNAME(f)} est une image clé et ne peut pas être déplacée. Utilisez les boutons d'image pour choisir un intervalle.`,fine:(leg,jn)=>`Réglage fin : ${leg}, ${jn} sélectionné (ajustez avec - / +)`,tipTitle:n=>`Conseils pour l'image ${n}`,
+legendBody:'🔴 Cercles rouges = la jambe avant (jambe gauche), 🔵 cercles bleus = la jambe arrière (jambe droite).\nGenou = ● grand cercle, cheville = ◆ losange, orteils = ▲ petit triangle.\nTouchez une articulation pour la sélectionner, puis déplacez-la petit à petit avec les boutons - / +.',
+tips:["La jambe avant se pose fermement au sol.\nPour la jambe arrière, placez le genou à mi-chemin entre ① et 3, et laissez les orteils se relever légèrement.","La jambe qui porte le poids reste tendue, posée à mi-chemin entre ① et ⑤.\nLa jambe levée reste pliée, posée légèrement.","La jambe arrière pousse sur les orteils, talon levé.\nLa jambe avant levée monte un peu plus haut que ⑤ à partir de la cuisse, avec de l'énergie.","La jambe avant se pose fermement au sol.\nPour la jambe arrière, placez le genou à mi-chemin entre ⑤ et 7, et laissez les orteils se relever légèrement.","La jambe qui porte le poids reste tendue, posée à mi-chemin entre ⑤ et ①.\nLa jambe levée reste pliée, posée légèrement.","La jambe arrière pousse sur les orteils, talon levé.\nLa jambe avant levée monte un peu plus haut que ① à partir de la cuisse, avec de l'énergie."]},
+es:{title:'Juego de intermedios al caminar',key1:'Clave 1 (Fotograma 1)',key2:'Clave 2 (Fotograma 5)',framePre:'Fotograma ',axisT:'Pierna de apoyo:',axisL:'izquierda',axisR:'derecha',readTips:'Leer consejos',finish:'Marcar como terminado',next:'Siguiente intermedio',redraw:'Redibujar',undo:'Deshacer',reset:'Reiniciar este fotograma',saveGif:'Guardar como GIF',startOver:'Empezar de nuevo',close:'Cerrar',howTo:'Cómo jugar',adjBack:'Retroceder un poco la articulación elegida',adjFwd:'Adelantar un poco la articulación elegida',gifAlt:'Tu animación GIF',pvT:'1 fotograma<br>atrás',nvT:'1 fotograma<br>adelante',stop:'■ Detener',play:'▶ Reproducir',playMine:'▶ Reproducir mi animación',playRef:'▶ Reproducir la referencia',guide:'Guía: ',guideLabel:'Guía:',guideOff:'Guía: OFF',hideRef:'Ocultar referencia',showRef:'Mostrar referencia',spd1:'Velocidad: 1x',spd05:'Velocidad: 0,5x',lock:'Termina todos los fotogramas 2 a 4 para desbloquear los fotogramas 6 a 8.',playMsgMine:'tu animación',playMsgRef:'la referencia',complete:'¡Completado!',showingRef:'Mostrando la referencia',greenRef:'La figura verde es la referencia',poseRef:'Pose de referencia',refShort:'Referencia',creating:'Creando...',shareSent:'GIF enviado al menú de compartir',gifSavedLong:'GIF guardado. Si no se guardó, mantén pulsada (o haz clic derecho) la imagen mostrada para guardarla.',gifSaved:'GIF guardado',gifFail:'No se pudo guardar el GIF',restored:'Tu sesión anterior se restauró desde el guardado automático',legFront:'pierna delantera',legBack:'pierna trasera',joints:{k:'rodilla',n:'tobillo',t:'dedos del pie'},
+playing:s=>`Reproduciendo ${s} (24 fps, de tres en tres)`,keyMsg:f=>`${FNAME(f)} es un fotograma clave y no se puede mover. Usa los botones de fotograma para elegir un intermedio.`,fine:(leg,jn)=>`Ajuste fino: ${leg}, ${jn} seleccionado (mueve poco a poco con - / +)`,tipTitle:n=>`Consejos del fotograma ${n}`,
+legendBody:'🔴 Círculos rojos = la pierna delantera (pierna izquierda), 🔵 círculos azules = la pierna trasera (pierna derecha).\nRodilla = ● círculo grande, tobillo = ◆ rombo, dedos del pie = ▲ triángulo pequeño.\nToca una articulación para seleccionarla y muévela poco a poco con los botones - / +.',
+tips:['La pierna delantera se apoya firmemente en el suelo.\nPara la pierna trasera, coloca la rodilla a mitad de camino entre ① y 3, y deja que los dedos del pie se levanten un poco.','La pierna que soporta el peso permanece recta, apoyada a mitad de camino entre ① y ⑤.\nLa pierna levantada permanece doblada, apoyada con suavidad.','La pierna trasera empuja con los dedos del pie, con el talón levantado.\nLa pierna delantera levantada sube un poco más que ⑤ desde el muslo, con energía.','La pierna delantera se apoya firmemente en el suelo.\nPara la pierna trasera, coloca la rodilla a mitad de camino entre ⑤ y 7, y deja que los dedos del pie se levanten un poco.','La pierna que soporta el peso permanece recta, apoyada a mitad de camino entre ⑤ y ①.\nLa pierna levantada permanece doblada, apoyada con suavidad.','La pierna trasera empuja con los dedos del pie, con el talón levantado.\nLa pierna delantera levantada sube un poco más que ① desde el muslo, con energía.']},
+ar:{title:'لعبة رسوم المشي البينية',key1:'الرسم الرئيسي ① (الإطار ①)',key2:'الرسم الرئيسي ② (الإطار ⑤)',framePre:'الإطار ',axisT:'ساق الدعم:',axisL:'اليسرى',axisR:'اليمنى',readTips:'قراءة النصائح',finish:'وضع علامة اكتمال',next:'الرسم البيني التالي',redraw:'إعادة الرسم',undo:'تراجع',reset:'إعادة تعيين هذا الإطار',saveGif:'حفظ كـ GIF',startOver:'البدء من جديد',close:'إغلاق',howTo:'طريقة اللعب',adjBack:'تحريك المفصل المختار للخلف قليلًا',adjFwd:'تحريك المفصل المختار للأمام قليلًا',gifAlt:'رسوم GIF الخاصة بك',pvT:'إطار واحد<br>للخلف',nvT:'إطار واحد<br>للأمام',stop:'■ إيقاف',play:'▶ تشغيل',playMine:'▶ تشغيل رسومي',playRef:'▶ تشغيل المرجع',guide:'الدليل: ',guideLabel:'الدليل:',guideOff:'الدليل: OFF',hideRef:'إخفاء المرجع',showRef:'إظهار المرجع',spd1:'السرعة: 1x',spd05:'السرعة: 0.5x',lock:'أنهِ جميع الإطارات 2 إلى 4 أولًا لفتح الإطارات 6 إلى 8.',playMsgMine:'رسومك',playMsgRef:'المرجع',complete:'اكتمل!',showingRef:'يتم عرض المرجع',greenRef:'الشكل الأخضر هو المرجع',poseRef:'الوضعية المرجعية',refShort:'المرجع',creating:'جارٍ الإنشاء...',shareSent:'تم إرسال GIF إلى قائمة المشاركة',gifSavedLong:'تم حفظ GIF. إذا لم يتم حفظه، اضغط مطولًا (أو انقر بزر الفأرة الأيمن) على الصورة المعروضة لحفظها.',gifSaved:'تم حفظ GIF',gifFail:'تعذر حفظ GIF',restored:'تمت استعادة جلستك السابقة من الحفظ التلقائي',legFront:'الساق الأمامية',legBack:'الساق الخلفية',joints:{k:'الركبة',n:'الكاحل',t:'أصابع القدم'},
+playing:s=>`جارٍ تشغيل ${s} (24 إطارًا، على ثلاثات)`,keyMsg:f=>`${FNAME(f)} هو إطار رئيسي ولا يمكن تحريكه. استخدم أزرار الإطارات لاختيار رسم بيني.`,fine:(leg,jn)=>`ضبط دقيق: ${leg}، تم اختيار ${jn} (حرّك قليلًا بـ - / +)`,tipTitle:n=>`نصائح الإطار ${n}`,
+legendBody:'🔴 الدوائر الحمراء = الساق الأمامية (الساق اليسرى)، 🔵 الدوائر الزرقاء = الساق الخلفية (الساق اليمنى).\nالركبة = ● دائرة كبيرة، الكاحل = ◆ معين، أصابع القدم = ▲ مثلث صغير.\nانقر على مفصل لاختياره، ثم حرّكه قليلًا بأزرار - / +.',
+tips:['تثبت الساق الأمامية بقوة على الأرض.\nبالنسبة للساق الخلفية، ضع الركبة في المنتصف بين ① و3، واترك أصابع القدم ترتد قليلًا.','الساق التي تحمل الوزن تبقى مستقيمة، ومثبتة في المنتصف بين ① و⑤.\nالساق المرفوعة تبقى مثنية وملامسة بخفة.','تدفع الساق الخلفية بأصابع القدم، والكعب مرفوع.\nالساق الأمامية المرفوعة تصعد من الفخذ أعلى قليلًا من ⑤، وبها طاقة.','تثبت الساق الأمامية بقوة على الأرض.\nبالنسبة للساق الخلفية، ضع الركبة في المنتصف بين ⑤ و7، واترك أصابع القدم ترتد قليلًا.','الساق التي تحمل الوزن تبقى مستقيمة، ومثبتة في المنتصف بين ⑤ و①.\nالساق المرفوعة تبقى مثنية وملامسة بخفة.','تدفع الساق الخلفية بأصابع القدم، والكعب مرفوع.\nالساق الأمامية المرفوعة تصعد من الفخذ أعلى قليلًا من ①، وبها طاقة.']}
+};
+const S=()=>STR[lang];
+
 const lerp=(a,b,t)=>Array.isArray(a)?a.map((v,i)=>lerp(v,b[i],t)):typeof a==='object'?Object.fromEntries(Object.keys(a).map(k=>[k,lerp(a[k],b[k],t)])):a+(b-a)*t;
 // 脚[太もも,すね,足] 腕[上腕,前腕] 角度は真下から進行方向へ+（描画時に左向きへ反転）
 const K1={R:[30,30,-12],L:[-24,-55,45],aR:[-28,-12],aL:[26,52],lean:4};
@@ -75,16 +133,16 @@ function raiseAnkle(p,leg,dx,dy){const D=Math.PI/180,a=p[leg][0]*D,b=p[leg][1]*D
 // R=手前の脚(左足)、L=奥の脚(右足)、aR=手前の腕、aL=奥の腕。角度は真下(腕は真下)から進行方向へ+
 const IDEAL0=[
  {R:[18,4,0],L:[-4,-73,76],aR:[-16,6],aL:[28,38],lean:4.5},
- {R:[0,-2,0],L:[20,-55,35],aR:[-4.5,17],aL:[17,20],lean:5},
- {R:[-6,-36,23],L:[40,2,-8],aR:[12,35],aL:[-5,-10],lean:5}];
+ {R:[-4.4,-6.4,0],L:[20,-55,35],aR:[-4.5,17],aL:[17,20],lean:5},
+ {R:[-8,-38,23],L:[40,2,-8],aR:[12,35],aL:[-5,-10],lean:5}];
 const IDEAL=IDEAL0.concat(IDEAL0.map(sw));
 const NUM=[2,3,4,6,7,8],NAMES=['①','2','3','4','⑤','6','7','8'],SV=[null,0,1,2,null,3,4,5],FI=[1,2,3,5,6,7];
-const FNAME=f=>f==0?'原画①(動画①)':f==4?'原画②(動画⑤)':'動画'+NAMES[f];
+const FNAME=f=>f==0?S().key1:f==4?S().key2:S().framePre+NAMES[f];
 const SEQ=[1,0,2,4,3,5]; // おすすめの順：動画3→2→4（ターム1）、動画7→6→8（ターム2）
 const GUIDE={1:['k1','k2'],0:['k1',1],2:[1,'k2'],4:['k2','k1',1],3:['k2',4,0],5:[4,'k1',2]};
 const GC={k1:'#2f6fdb',k2:'#2e9e4f'};
 const gcol=(g,j)=>GC[g]||(j>=3&&g<3?'#ff5c5c':['#b8860b','#0e9aa7','#777'][g%3]);
-const gname=g=>g=='k1'?'原画①(動画①)':g=='k2'?'原画②(動画⑤)':'動画'+NUM[g];
+const gname=g=>g=='k1'?S().key1:g=='k2'?S().key2:S().framePre+NUM[g];
 const rd=d=>d*Math.PI/180,mir=p=>[2*HX-p[0],p[1]];
 function pts(p){
  const leg=a=>{const k=[HX+L1*Math.sin(rd(a[0])),L1*Math.cos(rd(a[0]))];const n=[k[0]+L2*Math.sin(rd(a[1])),k[1]+L2*Math.cos(rd(a[1]))];return{k,n,t:[n[0]+FT*Math.cos(rd(a[2])),n[1]+FT*Math.sin(rd(a[2]))]}};
@@ -140,7 +198,14 @@ const defaultState=j=>{const K=KEY[j<3?'k1':'k2'];return{r:fromModel(K.R),l:from
 function puppetFrame(c,j,s){const hip=hipOf(j);legB(c,hip,legPts(hip,s.l),1);draw(c,IDEAL[j],{part:'upper'});legB(c,hip,legPts(hip,s.r),0);draw(c,IDEAL[j],{part:'nearArm'})}
 const HC={r:'#ff3b3b',l:'#18b3ff'},HRAD={k:14,n:14,t:10}; // r=手前の脚(オレンジ)=左足 / l=奥の脚(紫)=右足
 function handles(){const j=jj(),hip=hipOf(j),P=getP(j),a=[];for(const L of['l','r']){const q=legPts(hip,P[L]);for(const k of['t','n','k'])a.push({L,j:k,p:q[k]})}return a}
-function drawHandles(){for(const h of handles()){cx.fillStyle=HC[h.L];cx.strokeStyle='#fff';cx.lineWidth=3;cx.beginPath();cx.arc(h.p[0],h.p[1],HRAD[h.j],0,7);cx.fill();cx.stroke()}}
+function drawHandles(){for(const h of handles()){ // 膝=大きい丸・足首=ひし形・つま先=小さい三角（形でも関節が分かる）
+ const r=HRAD[h.j],isSel=sel&&sel.L==h.L&&sel.j==h.j;
+ cx.save();cx.fillStyle=HC[h.L];cx.strokeStyle='#fff';cx.lineWidth=3;
+ if(isSel){cx.strokeStyle='#e8890c';cx.lineWidth=2;cx.beginPath();cx.arc(h.p[0],h.p[1],r+7,0,7);cx.stroke();cx.strokeStyle='#fff';cx.lineWidth=3}
+ if(h.j=='k'){cx.beginPath();cx.arc(h.p[0],h.p[1],r,0,7);cx.fill();cx.stroke()}
+ else if(h.j=='n'){cx.beginPath();cx.moveTo(h.p[0],h.p[1]-r);cx.lineTo(h.p[0]+r,h.p[1]);cx.lineTo(h.p[0],h.p[1]+r);cx.lineTo(h.p[0]-r,h.p[1]);cx.closePath();cx.fill();cx.stroke()}
+ else{cx.beginPath();cx.moveTo(h.p[0],h.p[1]-r);cx.lineTo(h.p[0]+r*.9,h.p[1]+r*.8);cx.lineTo(h.p[0]-r*.9,h.p[1]+r*.8);cx.closePath();cx.fill();cx.stroke()}
+ cx.restore()}}
 
 // ガイド用：人形を色付き半透明で重ねる（重なりで濃くならないよう別キャンバスに描いてから合成）
 const off=document.createElement('canvas');off.width=W;off.height=H;const ox_=off.getContext('2d');
@@ -152,34 +217,53 @@ function drawGuides(j){for(const g of GUIDE[j]){let fn;
  else{const s=saved[g];if(!s)continue;const hip=hipOf(g);fn=c=>{legB(c,hip,legPts(hip,s.l),1);legB(c,hip,legPts(hip,s.r),0)}}
  guideDoll(fn,gcol(g,j),.45)}}
 // 軸足バッジ（動画2〜4は左足、6〜8は右足）
-function badge(c,j,x,y,sz){const L=j<3?'r':'l',t=`軸足：${j<3?'左足':'右足'}`;c.save();c.font=`bold ${sz}px sans-serif`;
- const w=c.measureText(t).width+sz*1.9;c.fillStyle='#fff';c.strokeStyle=HC[L];c.lineWidth=3;c.beginPath();c.rect(x,y,w,sz*1.7);c.fill();c.stroke();
- c.fillStyle=HC[L];c.beginPath();c.arc(x+sz*.8,y+sz*.85,sz*.4,0,7);c.fill();
- c.fillStyle='#1d2733';c.textBaseline='middle';c.textAlign='left';c.fillText(t,x+sz*1.5,y+sz*.9);c.restore()}
+function badge(c,j,x,y,sz){const L=j<3?'r':'l',t1=S().axisT,t2=j<3?S().axisL:S().axisR;c.save();c.font=`bold ${sz}px sans-serif`;
+ const w=Math.max(c.measureText(t1).width,c.measureText(t2).width)+sz*1.9;c.fillStyle='#fff';c.strokeStyle=HC[L];c.lineWidth=3;c.beginPath();c.rect(x,y,w,sz*2.7);c.fill();c.stroke();
+ c.fillStyle=HC[L];c.beginPath();c.arc(x+sz*.8,y+sz*1.35,sz*.4,0,7);c.fill();
+ c.fillStyle='#1d2733';c.textBaseline='middle';c.textAlign='left';c.fillText(t1,x+sz*1.5,y+sz*.72);c.fillText(t2,x+sz*1.5,y+sz*1.98);c.restore()}
 // 右上の「ポーズ見本」枠
 function inset(f){const j=SV[f],pose=j==null?KEY[f?'k2':'k1']:IDEAL[j];
- cx.save();cx.fillStyle='#fff';cx.strokeStyle='#f97316';cx.lineWidth=6;cx.fillRect(525,95,165,318);cx.strokeRect(525,95,165,318);
+ cx.save();cx.fillStyle='#fff';cx.strokeStyle='#ffa726';cx.lineWidth=6;cx.fillRect(525,95,165,318);cx.strokeRect(525,95,165,318);
  cx.strokeStyle='#b9c2cb';cx.lineWidth=2;cx.beginPath();cx.moveTo(535,396);cx.lineTo(680,396);cx.stroke();
  cx.save();cx.beginPath();cx.rect(528,98,159,312);cx.clip();draw(cx,pose,{t:{ox:607,oy:392,s:.58}});cx.restore();
- cx.fillStyle='#f97316';cx.font='bold 28px sans-serif';cx.textAlign='right';cx.textBaseline='alphabetic';cx.fillText('ポーズ見本',692,82);cx.restore()}
+ cx.fillStyle='#ffa726';cx.font='bold 28px sans-serif';cx.textAlign='right';cx.textBaseline='alphabetic';cx.fillText(S().poseRef,692,448);cx.restore()}
 
 // ---- 状態 ----
 let cur=FI[SEQ[0]],term=1,saved=[],touched=[],scores=[],avg=0,drag=null,guide=true,timer=null,playing=false,vIdeal=false,finished=false,refOn=false,warn='',wt=0;
+let undoStack=[],pendingUndo=null,lastPersist=0,restored=false;
+let sel=null,speed=1,popMode=null; // sel=選んだ関節{L,j} / speed=再生倍率 / popMode='tip'|'legend'
 const jj=()=>SV[cur];
 const getP=j=>saved[j]||(saved[j]=defaultState(j));
 const term1Done=()=>[0,1,2].every(j=>touched[j]);
 const allDone=()=>[0,1,2,3,4,5].every(j=>touched[j]);
 const accessible=f=>finished||f<=4||term1Done(); // 動画2〜4を描き終えるまで動画6〜8には進めない
 const editing=()=>!playing&&!finished&&!vIdeal&&jj()!=null;
-const LOCK='動画2〜4を全部描くと、動画6〜8に進めます';
 function flash(t){warn=t;updateMsg();clearTimeout(wt);wt=setTimeout(()=>{warn='';updateMsg()},2800)}
+
+// ---- 自動保存（localStorage。ポーズ・作業済みフラグ・表示中のコマを保存し、次回に復元する） ----
+const LS_KEY='walk-nakawari-save-v1';
+const LG_KEY='walk-nakawari-legend-v1';
+const clonePose=s=>JSON.parse(JSON.stringify(s));
+const validPose=s=>s&&s.r&&s.l&&['r','l'].every(L=>['a1','a2','a3'].every(k=>Number.isFinite(s[L][k])));
+function persist(){try{localStorage.setItem(LS_KEY,JSON.stringify({saved,touched,cur}))}catch(e){}}
+function persistSoon(){const n=Date.now();if(n-lastPersist>500){lastPersist=n;persist()}}
+function loadSave(){try{const d=JSON.parse(localStorage.getItem(LS_KEY));if(!d)return;
+ if(Array.isArray(d.saved))saved=d.saved.map(s=>validPose(s)?s:null);
+ if(Array.isArray(d.touched))touched=d.touched.map(Boolean);
+ saved=saved.slice(0,6);touched=touched.slice(0,6);
+ if(Number.isInteger(d.cur)&&d.cur>=0&&d.cur<8&&(d.cur<=4||term1Done()))cur=d.cur;
+ restored=touched.some(Boolean)}catch(e){}}
+loadSave();
+
+// ---- 元に戻す（ドラッグ1回分とリセットを取り消す。最大50手） ----
+function pushUndo(j,prev,prevTouched){undoStack.push({j,prev:clonePose(prev),prevTouched:!!prevTouched});if(undoStack.length>50)undoStack.shift()}
 
 // 上のサムネイル：動画⑤→①の向き（歩く向きに合わせて右から左へ時間が進む）
 const strip=$('strip'),cells=[];
 for(let i=0;i<5;i++){const d=document.createElement('div');d.className='th';d.innerHTML='<div class="tl"></div><canvas width="160" height="200"></canvas>';strip.appendChild(d);
- d.onclick=()=>{const f=d._f;if(!accessible(f)){flash(LOCK);return}go(f)};cells.push(d)}
+ d.onclick=()=>{const f=d._f;if(!accessible(f)){flash(S().lock);return}go(f)};cells.push(d)}
 function renderStrip(){const fr=term==1?[4,3,2,1,0]:[0,7,6,5,4];
- fr.forEach((f,i)=>{const d=cells[i],j=SV[f];d._f=f;d.classList.toggle('cur',f==cur);d.firstChild.textContent='動画'+NAMES[f];
+ fr.forEach((f,i)=>{const d=cells[i],j=SV[f];d._f=f;d.classList.toggle('cur',f==cur);d.firstChild.textContent=S().framePre+NAMES[f];
   const c=d.lastChild.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,160,200);
   c.strokeStyle='#b9c2cb';c.lineWidth=2;c.beginPath();c.moveTo(8,192);c.lineTo(152,192);c.stroke();
   c.save();c.translate(80,188);c.scale(.44,.44);c.translate(-HX,-G);
@@ -199,62 +283,91 @@ function render(){
   if(ed)drawHandles();
  }
  cx.save();cx.textAlign='left';cx.textBaseline='alphabetic';cx.font='bold 58px sans-serif';cx.fillStyle='#1d2733';
- const lb='動画'+NAMES[f],lw=cx.measureText(lb).width;cx.fillText(lb,14,62);
- if(vIdeal){cx.font='bold 22px sans-serif';cx.fillStyle='#66727f';cx.fillText('見本参考',22+lw,62)}cx.restore();
- if(j!=null&&!playing&&!vIdeal)badge(cx,j,12,76,20);
+ const lb=S().framePre+NAMES[f],lw=cx.measureText(lb).width;cx.fillText(lb,14,62);
+ if(vIdeal){cx.font='bold 22px sans-serif';cx.fillStyle='#66727f';cx.fillText(S().refShort,22+lw,62)}cx.restore();
+ if(j!=null&&!playing&&!vIdeal)badge(cx,j,12,76,26);
  if(!playing&&!vIdeal)inset(f);
- renderStrip();updateMsg();updateUI();
+ renderStrip();updateMsg();updateUI();updateTip();fit();
 }
 function updateMsg(){
  const f=cur,j=SV[f];let h='';
- if(playing)h=`${vIdeal?'見本参考':'自分の中割り'}を再生中（24fps・3コマ打ち）`;
+ if(playing)h=S().playing(vIdeal?S().playMsgRef:S().playMsgMine);
  else if(finished){
-  h=`<b>完成！</b>　${FNAME(f)}`+(vIdeal?'　見本参考を表示中':refOn&&j!=null?'　緑の人形が見本参考です':'');
- }else if(j==null)h=`${FNAME(f)}は原画なので動かせません。「1枚進む・戻る」で中割りを選ぼう。`;
+  h=`<b>${S().complete}</b>　${FNAME(f)}`+(vIdeal?'　'+S().showingRef:refOn&&j!=null?'　'+S().greenRef:'');
+ }else if(j==null)h=S().keyMsg(f);
  else if(guide){
   const gs=GUIDE[j].map(g=>`<i style="background:${gcol(g,j)}"></i>${gname(g)}`).join('');
-  h=`<span class="key"><span class="gl">ガイド:</span>${gs}</span>`;
- }else h=`<span class="gl">ガイド: OFF</span>`;
+  h=`<span class="key"><span class="gl">${S().guideLabel}</span>${gs}</span>`;
+ }else h=`<span class="gl">${S().guideOff}</span>`;
  if(warn)h+=`<br><span class="warn">${warn}</span>`;
+ if(editing()){
+  if(sel)h+=`<br><span class="gl">${S().fine(sel.L=='r'?S().legFront:S().legBack,S().joints[sel.j])}</span>`;
+ }
  $('msg').innerHTML=h;
 }
 function updateUI(){
- const n=touched.filter(Boolean).length;
- $('step').textContent=finished?'完成':`ターム${term}（動画${term==1?'2〜4':'6〜8'}）｜描いた ${n}/6`;
- $('rGo').hidden=!(allDone()&&!finished);$('r1').hidden=finished;$('rF').hidden=!finished;$('clr').hidden=finished;$('gif').hidden=!finished;if(!finished)$('gp').hidden=true;
- $('gd').textContent='ガイド:'+(guide?'ON':'OFF');$('gd').classList.toggle('on',guide);
+ $('rGo').hidden=!(allDone()&&!finished);$('r1').hidden=finished;$('rF').hidden=!finished;$('clr').hidden=finished;$('undo').hidden=finished;$('undo').disabled=!undoStack.length;$('gif').hidden=!finished;if(!finished)$('gp').hidden=true;
+ $('gd').textContent=S().guide+(guide?'ON':'OFF');$('gd').classList.toggle('on',guide);
  $('pp').classList.toggle('single',!finished);$('bi').hidden=!finished;
- $('bp').textContent=playing&&!vIdeal?'■ 停止':(finished?'▶ 自分の中割を再生':'▶ 再生');
- $('bi').textContent=playing&&vIdeal?'■ 停止':'▶ 見本参考を再生';
- $('sr').textContent=refOn?'見本参考を隠す':'見本参考を表示';
+ $('bp').textContent=playing&&!vIdeal?S().stop:(finished?S().playMine:S().play);
+ $('bi').textContent=playing&&vIdeal?S().stop:S().playRef;
+ $('sr').textContent=refOn?S().hideRef:S().showRef;
+ $('spd').textContent=speed==1?S().spd1:S().spd05;
+ $('adjM').disabled=$('adjP').disabled=!editing()||!sel;
+ document.body.classList.toggle('done',finished);
 }
-const pos=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*H/r.height]};
+const pos=e=>{const r=cv.getBoundingClientRect(),sc=Math.min(r.width/W,r.height/H),ox=(r.width-W*sc)/2,oy=(r.height-H*sc)/2;return[(e.clientX-r.left-ox)/sc,(e.clientY-r.top-oy)/sc]};
+function moveAnkle(s,hip,tx,ty){ // 足首を目標位置へ：2ボーンIK（長さ固定、膝は進行方向側に曲がる）
+ const dx=tx-hip[0],dy=ty-hip[1];let d=Math.hypot(dx,dy)||1;d=Math.min(Math.max(d,20),L1+L2-.5);
+ const ux=dx/d,uy=dy/d,h=Math.sqrt(Math.max(L1*L1-d*d/4,0));
+ const kx=hip[0]+ux*d/2-uy*h,ky=hip[1]+uy*d/2+ux*h;
+ s.a1=Math.atan2(kx-hip[0],ky-hip[1]);s.a2=Math.atan2(hip[0]+ux*d-kx,hip[1]+uy*d-ky)}
 cv.onpointerdown=e=>{if(!editing())return;const p=pos(e);let best=null,bd=34;
  for(const h of handles()){const d=Math.hypot(h.p[0]-p[0],h.p[1]-p[1]);if(d<bd){bd=d;best=h}}
- if(best){drag=best;cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing'}};
-cv.onpointermove=e=>{if(!drag)return;const p=pos(e),j=jj(),s=getP(j)[drag.L],hip=hipOf(j);
+ if(best){const j=jj();pendingUndo={j,prev:clonePose(getP(j)),prevTouched:!!touched[j]};drag=best;sel=best;cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing'}};
+cv.onpointermove=e=>{if(!drag)return;if(pendingUndo){pushUndo(pendingUndo.j,pendingUndo.prev,pendingUndo.prevTouched);pendingUndo=null}
+ const p=pos(e),j=jj(),s=getP(j)[drag.L],hip=hipOf(j);
  if(drag.j=='k'){s.a1=Math.atan2(p[0]-hip[0],p[1]-hip[1])} // 太ももが回り、すね・足は一緒に動く
- else if(drag.j=='n'){ // 足首：2ボーンIK（長さ固定、膝は進行方向側に曲がる）
-  const dx=p[0]-hip[0],dy=p[1]-hip[1];let d=Math.hypot(dx,dy)||1;d=Math.min(Math.max(d,20),L1+L2-.5);
-  const ux=dx/d,uy=dy/d,h=Math.sqrt(Math.max(L1*L1-d*d/4,0));
-  const kx=hip[0]+ux*d/2-uy*h,ky=hip[1]+uy*d/2+ux*h;
-  s.a1=Math.atan2(kx-hip[0],ky-hip[1]);s.a2=Math.atan2(hip[0]+ux*d-kx,hip[1]+uy*d-ky);
- }else{const n=legPts(hip,s).n;s.a3=Math.atan2(p[1]-n[1],p[0]-n[0])} // つま先：足首を軸に足が回る
- touched[j]=true;render()};
-cv.onpointerup=cv.onpointercancel=()=>{drag=null;cv.style.cursor='grab'};
-$('clr').onclick=()=>{if(!editing())return;const j=jj();saved[j]=defaultState(j);touched[j]=false;render()};
+ else if(drag.j=='n'){moveAnkle(s,hip,p[0],p[1])}
+ else{const n=legPts(hip,s).n;s.a3=Math.atan2(p[1]-n[1],p[0]-n[0])} // つま先：足首を軸に足が回る
+ touched[j]=true;persistSoon();render()};
+cv.onpointerup=cv.onpointercancel=()=>{const hadDrag=!!drag;drag=null;pendingUndo=null;cv.style.cursor='grab';if(hadDrag){persist();render()}};
+$('clr').onclick=()=>{if(!editing())return;const j=jj();pushUndo(j,getP(j),touched[j]);saved[j]=defaultState(j);touched[j]=false;persist();render()};
+$('undo').onclick=()=>{if(playing||!undoStack.length)return;const u=undoStack.pop();stopPlay();finished=false;vIdeal=false;refOn=false;saved[u.j]=clonePose(u.prev);touched[u.j]=u.prevTouched;cur=FI[u.j];persist();render()};
 $('gd').onclick=()=>{guide=!guide;render()};
+// ---- 微調整（選んだ関節を少しずつ。1回押す＝元に戻す1手分）----
+function nudge(dir){if(!editing()||!sel)return;const j=jj(),s=getP(j)[sel.L],hip=hipOf(j),d=dir*0.035;
+ pushUndo(j,getP(j),touched[j]);
+ if(sel.j=='k')s.a1+=d;
+ else if(sel.j=='t')s.a3+=d;
+ else{const q=legPts(hip,s);moveAnkle(s,hip,q.n[0]-dir*5,q.n[1])} // 足首：前後に5pxずつ
+ touched[j]=true;persistSoon();render()}
+$('adjM').onclick=()=>nudge(-1);
+$('adjP').onclick=()=>nudge(1);
+// ---- 再生速度（1倍⇔0.5倍。止めた状態では「1枚戻る・進む」でコマ送り）----
+$('spd').onclick=()=>{speed=speed==1?0.5:1;if(playing)setTimer();updateUI()};
+// ---- 遊び方（初回だけ自動で開く。あとからもこのボタンで見られる）----
+function showLegend(){$('popt').textContent=S().howTo;$('popb').textContent=S().legendBody;popMode='legend';$('pop').hidden=false}
+$('lgd').onclick=showLegend;
+// ---- 言語切替（押すたびに日本語⇔英語。静的な文言を差し替えて再描画する） ----
+function applyLang(){const s=S();document.title=s.title;document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';$('ttl').textContent=s.title;document.querySelectorAll('.langb').forEach(b=>b.classList.toggle('on',b.dataset.lang===lang));
+ $('tip').textContent=s.readTips;$('go').textContent=s.finish;$('nxs').textContent=s.next;$('rdo').textContent=s.redraw;$('undo').textContent=s.undo;$('clr').textContent=s.reset;$('gif').textContent=s.saveGif;$('ba').textContent=s.startOver;$('lgd').textContent=s.howTo;$('gpx').textContent=s.close;
+ $('popx').setAttribute('aria-label',s.close);$('adjM').setAttribute('aria-label',s.adjBack);$('adjP').setAttribute('aria-label',s.adjFwd);$('gpi').alt=s.gifAlt;
+ $('pvt').innerHTML=s.pvT;$('nvt').innerHTML=s.nvT;render()}
+document.querySelectorAll('.langb').forEach(b=>b.onclick=()=>{if(lang===b.dataset.lang)return;lang=b.dataset.lang;try{localStorage.setItem('walk-nakawari-lang',lang)}catch(e){}applyLang()});
 
 // ---- 移動・再生 ----
 function stopPlay(){clearInterval(timer);playing=false}
-function go(f){stopPlay();if(!finished)vIdeal=false;cur=f;render()}
-function step(d){const f=(cur+d+8)%8;stopPlay();if(!finished)vIdeal=false;if(!accessible(f)){flash(LOCK);render();return}cur=f;render()}
+function go(f){stopPlay();if(!finished)vIdeal=false;cur=f;persist();render()}
+function step(d){const f=(cur+d+8)%8;stopPlay();if(!finished)vIdeal=false;if(!accessible(f)){flash(S().lock);render();return}cur=f;persist();render()}
 function nextSeq(){const j=jj();let nj;
  if(j==null){const u=SEQ.find(x=>!touched[x]);nj=u!=null?u:SEQ[0]}else nj=SEQ[(SEQ.indexOf(j)+1)%6];
- if(!accessible(FI[nj])){flash(LOCK);return}go(FI[nj])}
+ if(!accessible(FI[nj])){flash(S().lock);return}go(FI[nj])}
 const playLen=()=>accessible(7)?8:5; // ターム1が終わるまでは 動画①〜⑤ をループ
-function startPlay(ideal){stopPlay();vIdeal=ideal;playing=true;if(cur>=playLen())cur=0;render();
- timer=setInterval(()=>{cur=(cur+1)%playLen();render()},125)} // 24fps・3コマ打ち = 125ms
+let playSeq=[],playIdx=0; // 再生するコマの並び（原画と、作業済みの中割りだけ。未作業の中割りは入れない）
+function buildSeq(){const n=playLen(),s=[];for(let f=0;f<n;f++){const j=SV[f];if(j==null||vIdeal||touched[j])s.push(f)}return s.length?s:[0]}
+function setTimer(){clearInterval(timer);timer=setInterval(()=>{playIdx=(playIdx+1)%playSeq.length;cur=playSeq[playIdx];render()},125/speed)} // 24fps・3コマ打ち = 125ms（0.5倍なら250ms）
+function startPlay(ideal){stopPlay();vIdeal=ideal;playing=true;playSeq=buildSeq();playIdx=playSeq.indexOf(cur);if(playIdx<0)playIdx=0;cur=playSeq[playIdx];render();setTimer()}
 function pause(){stopPlay();if(!finished)vIdeal=false;render()}
 $('bp').onclick=()=>playing&&!vIdeal?pause():startPlay(false);
 $('bi').onclick=()=>playing&&vIdeal?pause():startPlay(true);
@@ -268,7 +381,7 @@ $('go').onclick=()=>{
 };
 $('sr').onclick=()=>{refOn=!refOn;render()};
 $('rdo').onclick=()=>{stopPlay();finished=false;vIdeal=false;refOn=false;render()};
-$('ba').onclick=()=>{stopPlay();finished=false;vIdeal=false;refOn=false;saved=[];touched=[];scores=[];cur=FI[SEQ[0]];term=1;render()};
+$('ba').onclick=()=>{stopPlay();finished=false;vIdeal=false;refOn=false;saved=[];touched=[];scores=[];undoStack=[];pendingUndo=null;try{localStorage.removeItem(LS_KEY)}catch(e){}cur=FI[SEQ[0]];term=1;render()};
 // ---- GIFアニメで保存（自分の中割り。24fps・3コマ打ち。下部に日時を入れる）----
 let DL=null;
 try{if(window.claude&&claude.use)claude.use('downloads').then(d=>{DL=d}).catch(()=>{})}catch(e){}
@@ -304,14 +417,14 @@ async function saveOutside(blob,name){
  $('gpi').src=gifUrl;$('gp').hidden=false; // 保存されないときは、この画像を長押しして保存できる
  try{ // スマホ：共有メニューから「画像を保存」などを選べる
   const file=new File([blob],name,{type:'image/gif'});
-  if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:name});flash('GIFアニメを共有メニューに渡しました');return}
+  if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:name});flash(S().shareSent);return}
  }catch(e){if(e&&e.name==='AbortError')return}
  const a=document.createElement('a');a.href=gifUrl;a.download=name;document.body.appendChild(a);a.click();a.remove(); // パソコン：ふつうのダウンロード
- flash('GIFアニメを保存しました。保存されないときは、下の画像を長押し（右クリック）して保存してください');
+ flash(S().gifSavedLong);
 }
 async function saveGif(){
  if(!finished)return;
-  stopPlay();const btn=$('gif'),old=btn.textContent;btn.disabled=true;btn.textContent='作成中…';
+  stopPlay();const btn=$('gif'),old=btn.textContent;btn.disabled=true;btn.textContent=S().creating;
  try{
   await new Promise(r=>setTimeout(r,30));
   const EW=540,EH=390,src=document.createElement('canvas');src.width=W;src.height=H;const sx=src.getContext('2d');
@@ -326,11 +439,29 @@ async function saveGif(){
   }
   const bytes=gifEncode(fr,EW,EH,dl);
   const name=`walk-nakawari-${stamp.replace(/[: ]/g,'-')}.gif`,blob=new Blob([bytes],{type:'image/gif'});
-  if(DL){await DL.save({filename:name,data:blob});flash('GIFアニメを保存しました')}
+  if(DL){await DL.save({filename:name,data:blob});flash(S().gifSaved)}
   else await saveOutside(blob,name);
- }catch(e){if(!(e&&e.code==='declined'))flash('GIFを保存できませんでした')}
+ }catch(e){if(!(e&&e.code==='declined'))flash(S().gifFail)}
  finally{btn.disabled=false;btn.textContent=old}
 }
 $('gif').onclick=saveGif;
-render();
+$('gpx').onclick=()=>{$('gp').hidden=true};
+$('gp').onclick=e=>{if(e.target.id=='gp')$('gp').hidden=true};
+// ---- ポイントを読む（「ポーズ見本」の上のボタン。×で閉じる）----
+// 添字 j：0=動画2, 1=動画3, 2=動画4, 3=動画6, 4=動画7, 5=動画8
+function showTip(j){$('popt').textContent=S().tipTitle(NUM[j]);$('popb').textContent=S().tips[j];popMode='tip'}
+function updateTip(){const j=jj(),show=j!=null&&!playing&&!vIdeal;$('tip').hidden=!show;
+ if(popMode=='tip'&&!$('pop').hidden){if(show)showTip(j);else{$('pop').hidden=true;popMode=null}}}
+$('tip').onclick=()=>{const j=jj();if(j==null)return;showTip(j);$('pop').hidden=false};
+$('popx').onclick=()=>{popMode=null;$('pop').hidden=true};
+// 描画スペース（縦横比を保って全体表示）に合わせて、ボタンを「ポーズ見本」の枠の上に置く
+function fit(){const r=cv.getBoundingClientRect(),sc=Math.min(r.width/W,r.height/H),ox=(r.width-W*sc)/2,oy=(r.height-H*sc)/2,b=$('tip');
+ b.style.right=Math.max(0,r.width-(ox+692*sc))+'px';b.style.top=(oy+10*sc)+'px'}
+document.addEventListener('touchmove',e=>{const t=e.target;if(!(t&&t.closest&&(t.closest('button')||t.closest('#gp'))))e.preventDefault()},{passive:false});
+document.addEventListener('pointermove',e=>{if(drag)e.preventDefault()},{passive:false});
+document.addEventListener('gesturestart',e=>e.preventDefault());
+window.addEventListener('resize',fit);try{new ResizeObserver(fit).observe($('cvw'))}catch(e){}
+applyLang();
+try{if(!localStorage.getItem(LG_KEY)){showLegend();localStorage.setItem(LG_KEY,'1')}}catch(e){}
+if(restored)flash(S().restored);
 </script></body></html>
