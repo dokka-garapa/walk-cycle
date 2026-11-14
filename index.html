@@ -7,14 +7,30 @@
 html,body{height:100%;margin:0;overscroll-behavior:none;overflow:hidden}
 body{background:linear-gradient(180deg,#ffedbe 0%,#fff9ea 48%,#ffe4b8 100%);color:#5f4632;font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI","Noto Sans JP",sans-serif;display:flex;justify-content:center;position:fixed;inset:0;width:100%}
 main{touch-action:none;width:100%;max-width:760px;height:100%;padding:10px 12px 14px;display:flex;flex-direction:column;gap:8px;box-sizing:border-box;min-height:0;overflow:hidden}
-.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:nowrap}
+.top>div{min-width:0}
 h1{font-size:17px;margin:0;font-weight:800;color:#e8890c;letter-spacing:.02em}
 #sub{font-size:11px;color:#bb8f5f;font-weight:700;letter-spacing:.05em;margin-top:1px}
 .top span{color:#bb8f5f;font-size:13px;font-weight:700}
-.langs{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+.langs{display:flex;gap:6px;margin-left:auto;flex-wrap:nowrap;justify-content:flex-end}
 .strip{direction:ltr}
 .langb{flex:0 0 auto;padding:5px 10px;font-size:12px}
 .langb.on{color:#fff;background:linear-gradient(180deg,#ffc766,#ffa726);border-color:#ffa726;box-shadow:0 3px 0 #e8890c}
+/* スマホでは言語ボタンを短いコード表示にして、タイトルの右に改行なしで並べる */
+@media (max-width:640px){
+ h1{font-size:15px}
+ #sub{font-size:10px}
+ .langs{gap:4px}
+ .langb{font-size:0;padding:5px 7px}
+ .langb::after{content:attr(data-s);font-size:11px;font-weight:800}
+}
+@media (max-width:400px){
+ h1{font-size:13px}
+ .top{gap:6px}
+ .langs{gap:3px}
+ .langb{padding:4px 5px}
+ .langb::after{font-size:10px}
+}
 .lead{margin:0;font-size:13px;line-height:1.6;color:#70543c;background:rgba(255,255,255,.72);border:2px solid #ffe4b3;border-radius:16px;padding:8px 12px}
 .strip{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
 .th{cursor:pointer;text-align:center;font-size:15px;font-weight:800;padding-bottom:2px;color:#bb8f5f}
@@ -61,7 +77,7 @@ body.done .pp #bp{flex:1.8;min-height:60px;font-size:21px;color:#fff;background:
 body.done .pp #bi{flex:.75;font-size:12px;opacity:.9}
 </style></head><body>
 <main>
-<div class="top"><div><h1 id="ttl">歩きの中割りゲーム</h1><div id="sub">アニメーター中割り体験</div></div><div class="langs"><button class="langb" data-lang="ja">日本語</button><button class="langb" data-lang="en">English</button><button class="langb" data-lang="ko">한국어</button><button class="langb" data-lang="zh">中文</button><button class="langb" data-lang="fr">Français</button><button class="langb" data-lang="es">Español</button><button class="langb" data-lang="ar">العربية</button></div></div>
+<div class="top"><div><h1 id="ttl">歩きの中割りゲーム</h1><div id="sub">アニメーター中割り体験</div></div><div class="langs"><button class="langb" data-lang="ja" data-s="日">日本語</button><button class="langb" data-lang="en" data-s="EN">English</button><button class="langb" data-lang="ko" data-s="한">한국어</button><button class="langb" data-lang="zh" data-s="中">中文</button><button class="langb" data-lang="fr" data-s="FR">Français</button><button class="langb" data-lang="es" data-s="ES">Español</button><button class="langb" data-lang="ar" data-s="ع">العربية</button></div></div>
 <div class="strip" id="strip"></div>
 <div class="paper cvw" id="cvw"><canvas id="cv"></canvas><button id="tip" hidden>ポイントを読む</button></div>
 <div class="msg" id="msg"></div>
@@ -308,9 +324,6 @@ function updateMsg(){
   h=`<span class="key"><span class="gl">${S().guideLabel}</span>${gs}</span>`;
  }else h=`<span class="gl">${S().guideOff}</span>`;
  if(warn)h+=`<br><span class="warn">${warn}</span>`;
- if(editing()){
-  if(sel)h+=`<br><span class="gl">${S().fine(sel.L=='r'?S().legFront:S().legBack,S().joints[sel.j])}</span>`;
- }
  $('msg').innerHTML=h;
 }
 function updateUI(){
