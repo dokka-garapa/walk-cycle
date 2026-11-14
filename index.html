@@ -134,9 +134,9 @@ function raiseAnkle(p,leg,dx,dy){const D=Math.PI/180,a=p[leg][0]*D,b=p[leg][1]*D
 // 動画2〜4の見本参考：送ってもらったイラスト（3枚）から読み取ったポーズ。動画6〜8は左右を入れ替えた同じポーズ
 // R=手前の脚(左足)、L=奥の脚(右足)、aR=手前の腕、aL=奥の腕。角度は真下(腕は真下)から進行方向へ+
 const IDEAL0=[
- {R:[18,4,0],L:[-4,-73,76],aR:[-16,6],aL:[28,38],lean:4.5},
- {R:[-4.4,-6.4,0],L:[20,-55,35],aR:[-4.5,17],aL:[17,20],lean:5},
- {R:[-8,-38,23],L:[40,2,-8],aR:[12,35],aL:[-5,-10],lean:5}];
+ {R:[18,4,0],L:[-4,-73,76],aR:[-16,6],aL:[28,38],lean:3.25}, // 動画2（と動画6）の体の傾きは前後（原画4°と動画3・7の2.5°）の中間で滑らかに
+ {R:[-4.4,-6.4,0],L:[20,-55,35],aR:[-4.5,17],aL:[17,20],lean:2.5}, // 動画3（と左右反転した動画7）は上半身が少し起きて垂直に近づく＝揺れ
+ {R:[-8,-38,23],L:[40,2,-8],aR:[12,35],aL:[-5,-10],lean:3.25}]; // 動画4（と動画8）の体の傾きも前後の中間3.25°で滑らかに
 const IDEAL=IDEAL0.concat(IDEAL0.map(sw));
 // 動画6〜8の左腕（手前の腕aR）は、原画⑤の肘の曲がり（前腕−上腕=+26°）から原画①（+16°）へ、少し曲げたまま流れるよう前腕の角度を付け直す（従来は+10°/+3°/−5°とほぼまっすぐだった）
 [[3,24],[4,20],[5,18]].forEach(([j,b])=>{IDEAL[j]={...IDEAL[j],aR:[IDEAL[j].aR[0],IDEAL[j].aR[0]+b]}});
@@ -153,7 +153,8 @@ const rd=d=>d*Math.PI/180,mir=p=>[2*HX-p[0],p[1]];
 function pts(p){
  const leg=(a,bx)=>{const k=[bx+L1*Math.sin(rd(a[0])),L1*Math.cos(rd(a[0]))];const n=[k[0]+L2*Math.sin(rd(a[1])),k[1]+L2*Math.cos(rd(a[1]))];return{k,n,t:[n[0]+FT*Math.cos(rd(a[2])),n[1]+FT*Math.sin(rd(a[2]))]}};
  const r=leg(p.R,HX+(p.hR||0)),l=leg(p.L,HX+(p.hL||0));
- const dy=G-Math.max(r.n[1],r.t[1],l.n[1],l.t[1]);
+ const reach=Math.max(r.n[1],r.t[1],l.n[1],l.t[1]);
+ const dy=G-(180+(reach-180)*.6); // 上下動を小さくする：脚の届きの変化の6割だけを体の高さに反映する（残りは足の浮き・沈み最大5pxほどで吸収）
  const m=o=>{for(const k in o)o[k]=[o[k][0],o[k][1]+dy];return o};
  m(r);m(l);
  const hip=[HX,dy],hipR=[HX+(p.hR||0),dy],hipL=[HX+(p.hL||0),dy],s=Math.sin(rd(p.lean)),c=Math.cos(rd(p.lean));
