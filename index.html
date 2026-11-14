@@ -119,9 +119,10 @@ const S=()=>STR[lang];
 
 const lerp=(a,b,t)=>Array.isArray(a)?a.map((v,i)=>lerp(v,b[i],t)):typeof a==='object'?Object.fromEntries(Object.keys(a).map(k=>[k,lerp(a[k],b[k],t)])):a+(b-a)*t;
 // 脚[太もも,すね,足] 腕[上腕,前腕] 角度は真下から進行方向へ+（描画時に左向きへ反転）
-const K1={R:[30,30,-12],L:[-24,-55,45],aR:[-28,-12],aL:[26,52],lean:4};
+// hR/hL=脚の付け根(腰)の前後オフセット、sR/sL=腕の付け根(肩)の前後オフセット（+が進行方向＝前）。原画①では左足の付け根を少し前・左腕の付け根を少し後ろに
+const K1={R:[30,30,-12],L:[-24,-55,45],aR:[-28,-12],aL:[26,52],lean:4,hR:6,hL:-6,sR:-6,sL:6};
 const P1={R:[6,-4,0],L:[24,-34,30],aR:[-6,18],aL:[6,26],lean:5};
-const sw=p=>({R:p.L,L:p.R,aR:p.aL,aL:p.aR,lean:p.lean});
+const sw=p=>({R:p.L,L:p.R,aR:p.aL,aL:p.aR,lean:p.lean,hR:p.hL,hL:p.hR,sR:p.sL,sL:p.sR});
 const K2=sw(K1),P2=sw(P1),KEY={k1:K1,k2:K2};
 // フレーム f=0〜7 ＝ 動画①,2,3,4,⑤,6,7,8。中割りの添字 j=0〜5 ＝ 動画2,3,4,6,7,8
 // 見本参考の調整：遊脚の足首を少し上げる（動画4・8はさらに少し前＝左へ）。右足=奥の脚(L)、左足=手前の脚(R)
@@ -146,15 +147,15 @@ const gcol=(g,j)=>GC[g]||(j>=3&&g<3?'#ff5c5c':['#b8860b','#0e9aa7','#777'][g%3])
 const gname=g=>g=='k1'?S().key1:g=='k2'?S().key2:S().framePre+NUM[g];
 const rd=d=>d*Math.PI/180,mir=p=>[2*HX-p[0],p[1]];
 function pts(p){
- const leg=a=>{const k=[HX+L1*Math.sin(rd(a[0])),L1*Math.cos(rd(a[0]))];const n=[k[0]+L2*Math.sin(rd(a[1])),k[1]+L2*Math.cos(rd(a[1]))];return{k,n,t:[n[0]+FT*Math.cos(rd(a[2])),n[1]+FT*Math.sin(rd(a[2]))]}};
- const r=leg(p.R),l=leg(p.L);
+ const leg=(a,bx)=>{const k=[bx+L1*Math.sin(rd(a[0])),L1*Math.cos(rd(a[0]))];const n=[k[0]+L2*Math.sin(rd(a[1])),k[1]+L2*Math.cos(rd(a[1]))];return{k,n,t:[n[0]+FT*Math.cos(rd(a[2])),n[1]+FT*Math.sin(rd(a[2]))]}};
+ const r=leg(p.R,HX+(p.hR||0)),l=leg(p.L,HX+(p.hL||0));
  const dy=G-Math.max(r.n[1],r.t[1],l.n[1],l.t[1]);
  const m=o=>{for(const k in o)o[k]=[o[k][0],o[k][1]+dy];return o};
  m(r);m(l);
- const hip=[HX,dy],s=Math.sin(rd(p.lean)),c=Math.cos(rd(p.lean));
+ const hip=[HX,dy],hipR=[HX+(p.hR||0),dy],hipL=[HX+(p.hL||0),dy],s=Math.sin(rd(p.lean)),c=Math.cos(rd(p.lean));
  const neck=[HX+TL*s,dy-TL*c],sh=[HX+TL*.92*s,dy-TL*.92*c],head=[neck[0]+26*s,neck[1]-28*c];
- const arm=a=>{const e=[sh[0]+AU*Math.sin(rd(a[0])),sh[1]+AU*Math.cos(rd(a[0]))];return[sh,e,[e[0]+AL*Math.sin(rd(a[1])),e[1]+AL*Math.cos(rd(a[1]))]]};
- return{r,l,hip,neck,sh,head,ln:rd(p.lean),aR:arm(p.aR),aL:arm(p.aL)};
+ const arm=(a,sx)=>{const s0=[sx,sh[1]],e=[sx+AU*Math.sin(rd(a[0])),sh[1]+AU*Math.cos(rd(a[0]))];return[s0,e,[e[0]+AL*Math.sin(rd(a[1])),e[1]+AL*Math.cos(rd(a[1]))]]};
+ return{r,l,hip,hipR,hipL,neck,sh,head,ln:rd(p.lean),aR:arm(p.aR,sh[0]+(p.sR||0)),aL:arm(p.aL,sh[0]+(p.sL||0))};
 }
 // ---- 人形の描画 ----
 const OUT='#2a2a2e',COLS=['#ff9d9d','#a9e6ff'],GREEN='#b8f548'; // 手前=赤っぽいピンク / 奥=水色 / 頭と体=黄緑
@@ -181,8 +182,8 @@ function bodyDraw(c,q,part){
  const head=()=>{};
  if(part=='upper'){armB(q.aL,1);trunk();head()}
  else if(part=='nearArm'){armB(q.aR,0)} // 手前の腕（左腕）は足より前に出すため別描き
- else if(part=='lower'){legB(c,q.hip,q.l,1);legB(c,q.hip,q.r,0)}
- else{armB(q.aL,1);legB(c,q.hip,q.l,1);trunk();head();legB(c,q.hip,q.r,0);armB(q.aR,0)}
+ else if(part=='lower'){legB(c,q.hipL,q.l,1);legB(c,q.hipR,q.r,0)}
+ else{armB(q.aL,1);legB(c,q.hipL,q.l,1);trunk();head();legB(c,q.hipR,q.r,0);armB(q.aR,0)}
 }
 function draw(c,p,o){
  o=Object.assign({part:'all',t:{ox:HX,oy:G,s:1}},o);const q=pts(p),t=o.t;
