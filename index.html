@@ -138,6 +138,10 @@ const IDEAL0=[
  {R:[-4.4,-6.4,0],L:[20,-55,35],aR:[-4.5,17],aL:[17,20],lean:5},
  {R:[-8,-38,23],L:[40,2,-8],aR:[12,35],aL:[-5,-10],lean:5}];
 const IDEAL=IDEAL0.concat(IDEAL0.map(sw));
+// 動画6〜8の左腕（手前の腕aR）は、原画⑤の肘の曲がり（前腕−上腕=+26°）から原画①（+16°）へ、少し曲げたまま流れるよう前腕の角度を付け直す（従来は+10°/+3°/−5°とほぼまっすぐだった）
+[[3,24],[4,20],[5,18]].forEach(([j,b])=>{IDEAL[j]={...IDEAL[j],aR:[IDEAL[j].aR[0],IDEAL[j].aR[0]+b]}});
+// 動画4の右腕（奥の腕aL）はほぼ真下（-5°/-10°）で体のシルエットに隠れて見えなかったので、付け根を少し後ろへずらし（sL:-6）、動画⑤の右腕（上腕-28°・肘の曲がり+16°）に近い形に：上腕を後ろへ振り、肘は⑤と同じ+16°に曲げて体の後ろから見えるようにする
+IDEAL[2]={...IDEAL[2],aL:[-22,-6],sL:-6};
 const NUM=[2,3,4,6,7,8],NAMES=['①','2','3','4','⑤','6','7','8'],SV=[null,0,1,2,null,3,4,5],FI=[1,2,3,5,6,7];
 const FNAME=f=>f==0?S().key1:f==4?S().key2:S().framePre+NAMES[f];
 const SEQ=[1,0,2,4,3,5]; // おすすめの順：動画3→2→4（ターム1）、動画7→6→8（ターム2）
@@ -180,7 +184,8 @@ function bodyDraw(c,q,part){
    quad(c,L([15,-118]),L([14,-136]),26+e,24+e,col)};
   pass(6,OUT);pass(0,GREEN)};
  const head=()=>{};
- if(part=='upper'){armB(q.aL,1);trunk();head()}
+ if(part=='upper'){trunk();head()}
+ else if(part=='farArm'){armB(q.aL,1)} // 奥の腕（右腕）は右足より奥に描くため別描き
  else if(part=='nearArm'){armB(q.aR,0)} // 手前の腕（左腕）は足より前に出すため別描き
  else if(part=='lower'){legB(c,q.hipL,q.l,1);legB(c,q.hipR,q.r,0)}
  else{armB(q.aL,1);legB(c,q.hipL,q.l,1);trunk();head();legB(c,q.hipR,q.r,0);armB(q.aR,0)}
@@ -197,7 +202,7 @@ const hipOf=j=>pts(IDEAL[j]).hip;
 const legPts=(hip,s)=>{const k=[hip[0]+L1*Math.sin(s.a1),hip[1]+L1*Math.cos(s.a1)];const n=[k[0]+L2*Math.sin(s.a2),k[1]+L2*Math.cos(s.a2)];return{k,n,t:[n[0]+FT*Math.cos(s.a3),n[1]+FT*Math.sin(s.a3)]}};
 const fromModel=a=>({a1:-rd(a[0]),a2:-rd(a[1]),a3:Math.PI-rd(a[2])});
 const defaultState=j=>{const K=KEY[j<3?'k1':'k2'];return{r:fromModel(K.R),l:fromModel(K.L)}};
-function puppetFrame(c,j,s){const hip=hipOf(j);legB(c,hip,legPts(hip,s.l),1);draw(c,IDEAL[j],{part:'upper'});legB(c,hip,legPts(hip,s.r),0);draw(c,IDEAL[j],{part:'nearArm'})}
+function puppetFrame(c,j,s){const hip=hipOf(j);draw(c,IDEAL[j],{part:'farArm'});legB(c,hip,legPts(hip,s.l),1);draw(c,IDEAL[j],{part:'upper'});legB(c,hip,legPts(hip,s.r),0);draw(c,IDEAL[j],{part:'nearArm'})}
 const HC={r:'#ff3b3b',l:'#18b3ff'},HRAD={k:14,n:14,t:10}; // r=手前の脚(オレンジ)=左足 / l=奥の脚(紫)=右足
 function handles(){const j=jj(),hip=hipOf(j),P=getP(j),a=[];for(const L of['l','r']){const q=legPts(hip,P[L]);for(const k of['t','n','k'])a.push({L,j:k,p:q[k]})}return a}
 function drawHandles(){for(const h of handles()){ // 膝=大きい丸・足首=ひし形・つま先=小さい三角（形でも関節が分かる）
