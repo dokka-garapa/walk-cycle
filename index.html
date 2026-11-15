@@ -39,7 +39,7 @@ h1{font-size:17px;margin:0;font-weight:800;color:#e8890c;letter-spacing:.02em}
 .th.cur{color:#ef7d00}
 .th.cur canvas{border-color:#ef7d00;box-shadow:0 4px 12px rgba(239,125,0,.35)}
 .paper{background:#fff;border:2px solid #ffe1a8;border-radius:20px;overflow:hidden;box-shadow:0 8px 20px rgba(230,150,20,.13)}
-.cvw{position:relative;flex:1 1 auto;min-height:160px}
+.cvw{position:relative;flex:0 1 auto;width:100%;aspect-ratio:720/470;max-height:100%;margin:0 auto;min-height:0}
 canvas#cv{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain;touch-action:none;cursor:grab}
 #tip{position:absolute;flex:none;min-width:0;padding:6px 12px;font-size:13px;font-weight:800;background:#ffbe55;color:#fff;border:2px solid #fff;border-radius:999px;box-shadow:0 3px 8px rgba(230,150,20,.35)}
 #pop{position:fixed;inset:0;background:rgba(95,70,50,.45);display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
@@ -95,7 +95,7 @@ body.done .pp #bi{flex:.75;font-size:12px;opacity:.9}
 </main>
 <div id="pop" hidden><div class="card"><button id="popx" aria-label="閉じる">×</button><div class="pt" id="popt"></div><div class="pb" id="popb"></div></div></div>
 <script>
-const W=720,H=520,G=450,L1=96,L2=96,FT=34,TL=135,AU=74,AL=66,HX=330;
+const W=720,H=470,G=450,L1=96,L2=96,FT=34,TL=135,AU=74,AL=66,HX=330;
 const $=i=>document.getElementById(i),cv=$('cv'),cx=cv.getContext('2d');
 cv.width=W;cv.height=H;
 // ---- 多言語（日本語／英語。選んだ言語は保存される） ----
@@ -469,7 +469,7 @@ async function saveGif(){
   stopPlay();const btn=$('gif'),old=btn.textContent;btn.disabled=true;btn.textContent=S().creating;
  try{
   await new Promise(r=>setTimeout(r,30));
-  const EW=540,EH=390,src=document.createElement('canvas');src.width=W;src.height=H;const sx=src.getContext('2d');
+  const EW=540,EH=353,src=document.createElement('canvas');src.width=W;src.height=H;const sx=src.getContext('2d');
   const ex=document.createElement('canvas');ex.width=EW;ex.height=EH;const ec=ex.getContext('2d');
   const d=new Date(),p2=n=>String(n).padStart(2,'0'),stamp=`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}`;
   const fr=[],dl=[];
