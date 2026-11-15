@@ -282,6 +282,7 @@ function loadSave(){try{const d=JSON.parse(localStorage.getItem(LS_KEY));if(!d)r
  if(Number.isInteger(d.cur)&&d.cur>=0&&d.cur<8&&(d.cur<=4||term1Done()))cur=d.cur;
  restored=touched.some(Boolean)}catch(e){}}
 loadSave();
+for(let j=0;j<6;j++)if(saved[j]){clampLeg(j,'r');clampLeg(j,'l')} // 復元したポーズも地面より下に出ないように
 
 // ---- 元に戻す（ドラッグ1回分とリセットを取り消す。最大50手） ----
 function pushUndo(j,prev,prevTouched){undoStack.push({j,prev:clonePose(prev),prevTouched:!!prevTouched});if(undoStack.length>50)undoStack.shift()}
@@ -347,14 +348,29 @@ function moveAnkle(s,hip,tx,ty){ // 足首を目標位置へ：2ボーンIK（�
  const ux=dx/d,uy=dy/d,h=Math.sqrt(Math.max(L1*L1-d*d/4,0));
  const kx=hip[0]+ux*d/2-uy*h,ky=hip[1]+uy*d/2+ux*h;
  s.a1=Math.atan2(kx-hip[0],ky-hip[1]);s.a2=Math.atan2(hip[0]+ux*d-kx,hip[1]+uy*d-ky)}
+function clampLeg(j,L){ // 足首・足先が判定ライン（腰から脚を伸ばし切った距離）より下に出ないよう、脚全体を腰から少し回して持ち上げる（ポーズの形＝膝の曲がりは保つ）
+ const s=getP(j)[L],hip=hipOf(j),line=hip[1]+L1+L2,low=q=>Math.max(q.n[1],q.t[1]);
+ if(low(legPts(hip,s))<=line)return;
+ const rot=d=>low(legPts(hip,{a1:s.a1+d,a2:s.a2+d,a3:s.a3-d}));
+ const dir=rot(0.01)<rot(-0.01)?1:-1;let lo=0,hi=null,d=0.01;
+ for(let i=0;i<40&&hi==null;i++){if(rot(dir*d)<=line)hi=d;else{lo=d;d*=1.6}}
+ if(hi==null)return;
+ for(let i=0;i<24;i++){const m=(lo+hi)/2;if(rot(dir*m)<=line)hi=m;else lo=m}
+ const dd=dir*hi;s.a1+=dd;s.a2+=dd;s.a3-=dd}
+function capToe(s,hip){ // つま先が判定ラインを超えたら、足首を動かさず、目指す向きに一番近いライン上の角度に止める（反対側に張り付くと突然反転して見えるため）
+ const line=hip[1]+L1+L2,n=legPts(hip,s).n,v=(line-n[1])/FT;
+ if(v>=1||n[1]+FT*Math.sin(s.a3)<=line)return;
+ const b=Math.asin(Math.max(v,0));let t=s.a3%(2*Math.PI);if(t<0)t+=2*Math.PI;
+ s.a3=Math.abs(t-b)<=Math.abs(t-(Math.PI-b))?b:Math.PI-b}
 cv.onpointerdown=e=>{if(!editing())return;const p=pos(e);let best=null,bd=34;
  for(const h of handles()){const d=Math.hypot(h.p[0]-p[0],h.p[1]-p[1]);if(d<bd){bd=d;best=h}}
  if(best){const j=jj();pendingUndo={j,prev:clonePose(getP(j)),prevTouched:!!touched[j]};drag=best;sel=best;cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing'}};
 cv.onpointermove=e=>{if(!drag)return;if(pendingUndo){pushUndo(pendingUndo.j,pendingUndo.prev,pendingUndo.prevTouched);pendingUndo=null}
  const p=pos(e),j=jj(),s=getP(j)[drag.L],hip=hipOf(j);
  if(drag.j=='k'){s.a1=Math.atan2(p[0]-hip[0],p[1]-hip[1])} // 太ももが回り、すね・足は一緒に動く
- else if(drag.j=='n'){moveAnkle(s,hip,p[0],p[1])}
- else{const n=legPts(hip,s).n;s.a3=Math.atan2(p[1]-n[1],p[0]-n[0])} // つま先：足首を軸に足が回る
+ else if(drag.j=='n'){const gy=hip[1]+L1+L2-Math.max(0,FT*Math.sin(s.a3));moveAnkle(s,hip,p[0],Math.min(p[1],gy))} // 足首：目標位置を判定ラインで止めるので、足先は回らずラインに沿って滑る
+ else{const n=legPts(hip,s).n;s.a3=Math.atan2(p[1]-n[1],p[0]-n[0]);capToe(s,hip)} // つま先：足首を軸に足が回る（足首の位置は変わらない）
+ if(drag.j=='k')clampLeg(j,drag.L);
  touched[j]=true;persistSoon();render()};
 cv.onpointerup=cv.onpointercancel=()=>{const hadDrag=!!drag;drag=null;pendingUndo=null;cv.style.cursor='grab';if(hadDrag){persist();render()}};
 $('clr').onclick=()=>{if(!editing())return;const j=jj();pushUndo(j,getP(j),touched[j]);saved[j]=defaultState(j);touched[j]=false;persist();render()};
@@ -364,8 +380,9 @@ $('gd').onclick=()=>{guide=!guide;render()};
 function nudge(dir){if(!editing()||!sel)return;const j=jj(),s=getP(j)[sel.L],hip=hipOf(j),d=dir*0.035;
  pushUndo(j,getP(j),touched[j]);
  if(sel.j=='k')s.a1+=d;
- else if(sel.j=='t')s.a3+=d;
+ else if(sel.j=='t'){s.a3+=d;capToe(s,hip)}
  else{const q=legPts(hip,s);moveAnkle(s,hip,q.n[0]-dir*5,q.n[1])} // 足首：前後に5pxずつ
+ if(sel.j=='k')clampLeg(j,sel.L);
  touched[j]=true;persistSoon();render()}
 $('adjM').onclick=()=>nudge(-1);
 $('adjP').onclick=()=>nudge(1);
